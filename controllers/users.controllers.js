@@ -1,4 +1,5 @@
 import { pool } from "../db/db.js";
+import { hashPassword, verifyPassword } from "../hash.js";
 
 
 export const getUsers = (req, res) => {
@@ -26,8 +27,10 @@ export const getUser = (req, res) => {
 
 export const postUser = (req, res) => {
     const { name, username, password, age } = req.body
+    const hp = hashPassword(password);
+
     console.log(req.body);
-    pool.execute("insert into users (name, username, password, age) values (?,?,?,?)",[name, username, password, age], (error, results)=> {
+    pool.execute("insert into users (name, username, password, age) values (?,?,?,?)",[name, username, hp, age], (error, results)=> {
         if (error) {
             res.status(500).json({msg: error, users: []});
             return;
@@ -37,7 +40,9 @@ export const postUser = (req, res) => {
 };
 export const putUser = (req, res) => {
     res.json({id: request.params.id});
-    pool.execute("update users set name=? username=? password=? age=? where id = ?)",[name, username, password, age, req.params.id], (error, results)=> {
+    const hp = hashPassword(password);
+
+    pool.execute("update users set name=? username=? password=? age=? where id = ?)",[name, username, hp, age, req.params.id], (error, results)=> {
         if (error) {
             res.status(500).json({msg: error, users: []}); 
             return;
